@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Currency Converter</title>
+<style>
+body {
+margin: 0;
+padding: 0;
+font-family: Arial, sans-serif;
+background-image: url('https://images.pexels.com/photos/730547/pexels-photo-730547.jpeg'); /* Replace with actual image URL */
+background-size: cover;
+background-position: center;
+color: white;
+}
+.container {
+text-align: center;
+padding: 50px;
+background: rgba(0, 0, 0, 0.8);
+border-radius: 15px;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+max-width: 500px;
+margin: 10% auto;
+}
+h1 {
+font-size: 2.5em;
+margin-bottom: 20px;
+color: #f39c12;
+text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+}
+label {
+font-size: 1.2em;
+display: block;
+margin-bottom: 10px;
+color: #e0e0e0;
+}
+input, select, button {
+font-size: 1em;
+padding: 10px;
+margin: 10px 0;
+width: 80%;
+border-radius: 5px;
+border: none;
+}
+input, select {
+background: rgba(255, 255, 255, 0.1);
+color: white;
+outline: none;
+}
+button {
+background-color: #f39c12;
+color: white;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+button:hover {
+background-color: #e67e22;
+transform: scale(1.05);
+}
+#output {
+margin-top: 20px;
+font-size: 1.2em;
+color: #ffffff;
+text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Currency Converter</h1>
+<label for="from-currency">From Currency:</label>
+<select id="from-currency">
+<!-- Currency options will be dynamically populated -->
+</select>
+<label for="to-currency">To Currency:</label>
+<select id="to-currency">
+<!-- Currency options will be dynamically populated -->
+</select>
+<label for="amount">Amount:</label>
+<input type="number" id="amount" placeholder="Enter amount">
+<button id="convert-button">Convert</button>
+<div id="output"></div>
+</div>
+<script>
+const apiKey = 'YOUR_API_KEY'; // Replace with your actual API key
+const currenciesUrl = `https://api.currencyapi.com/v3/currencies?apikey=${apiKey}`;
+const ratesUrl = `https://api.currencyapi.com/v3/latest?apikey=${apiKey}`;
+const fromCurrencySelect = document.getElementById('from-currency');
+const toCurrencySelect = document.getElementById('to-currency');
+// Populate currency dropdowns
+fetch(currenciesUrl)
+.then(response => response.json())
+.then(data => {
+if (data && data.data) {
+const currencies = Object.keys(data.data);
+currencies.forEach(currency => {
+const option1 = document.createElement('option');
+option1.value = currency;
+option1.text =
+`${currency} - ${data.data[currency].name}`
+;
+fromCurrencySelect.appendChild(option1);
+const option2 = document.createElement('option');
+option2.value = currency;
+option2.text =
+`${currency} - ${data.data[currency].name}`
+;
+toCurrencySelect.appendChild(option2);
+});
+} else {
+console.error('Error fetching currencies.');
+}
+})
+.catch(error => console.error('Error:', error));
+document.getElementById('convert-button').addEventListener('click', () => {
+const fromCurrency = fromCurrencySelect.value;
+const toCurrency = toCurrencySelect.value;
+const amount = document.getElementById('amount').value;
+if (!amount || isNaN(amount) || amount <= 0) {
+document.getElementById('output').innerText = 'Please enter a valid amount.';
+return;
+}
+fetch(`${ratesUrl}&base_currency=${fromCurrency}`)
+.then(response => response.json())
+.then(data => {
+if (data && data.data) {
+const rate = data.data[toCurrency]?.value;
+if (rate) {
+const convertedAmount = (rate * amount).toFixed(2);
+document.getElementById('output').innerText =
+`${amount} ${fromCurrency} = ${convertedAmount} ${toCurrency}`
+;
+} else {
+document.getElementById('output').innerText = 'Conversion rate not available.';
+}
+} else {
+document.getElementById('output').innerText = 'Error fetching data.';
+}
+})
+.catch(error => {
+console.error('Error:', error);
+document.getElementById('output').innerText = 'An error occurred while fetching the
+data.';
+});
+});
+</script>
+</body>
+</html>
